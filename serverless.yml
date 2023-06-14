@@ -15,6 +15,9 @@ provider:
     role:
       statements:
         - Effect: Allow
+          Action: SNS:Publish
+          Resource: !Ref QuotesMessages      
+        - Effect: Allow
           Action: "s3:*"
           Resource: "*"
         - Effect: Allow
@@ -30,6 +33,7 @@ provider:
   environment:
     USERS_TABLE: ${self:custom.tableName}
     REGION: ${self:provider.region}
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:915494082450:quotes-messages-dev
 
 functions:
   quotes:
@@ -47,10 +51,35 @@ functions:
           path: subscribe
           method: post 
           cors: true
-          
+
+  staticMailer:
+    handler: handlers/staticMailer.staticMailer
+    events:
+      - http:
+          path: static-mailer
+          method: post 
+          cors: true        
 
 resources:
   Resources:
+    #SNS
+    QuotesMessages:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: quotes-messages-${self:provider.stage}
+    QuotesMessagesSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: !Ref QuotesMessages
+        Protocol: email
+        Endpoint: meet.server08@gmail.com
+        DeliveryPolicy: 
+          healthyRetryPolicy:
+            numRetries: 20
+            minDelayTarget: 30
+            maxDelayTarget: 600
+            backoffFunction: exponential
+
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
