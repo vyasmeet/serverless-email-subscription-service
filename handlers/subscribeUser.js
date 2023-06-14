@@ -1,14 +1,13 @@
 const AWS = require("aws-sdk");
-const { json } = require("express");
 const uuid = require("uuid");
 const USERS_TABLE = process.env.USERS_TABLE;
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 module.exports.subscribeUser = (event, context, callback) => {
-    const data = JSON.parse(event.body)
+    const data = JSON.parse(event.body);
     console.log("Incoming Event Data :::: ",data);
 
-    const timestamp = new Date().getTime()
+    const timestamp = new Date().getTime();
 
     if (typeof data.email !== "string") {
         console.error("Email is not string type, validation failed!");
@@ -37,7 +36,7 @@ module.exports.subscribeUser = (event, context, callback) => {
         // No error, return response back to Lambda
         const response = { 
             statusCode: 200,
-            body: JSON.stringify(data.Item)
+            body: JSON.stringify(data.Item),
         };
         callback(null, response);
     });

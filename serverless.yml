@@ -41,7 +41,7 @@ functions:
           cors: true
   
   subscribe:
-    handler: handler/subscribeUser.subscribeUser
+    handler: handlers/subscribeUser.subscribeUser
     events:
       - http:
           path: subscribe
