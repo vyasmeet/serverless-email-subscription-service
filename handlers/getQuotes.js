@@ -4,7 +4,7 @@ const s3 = new AWS.S3()
 
 module.exports.getQuotes = (event, context, callback) => {
     
-    console.log("Incoming request ===> ",event);
+    console.log("Incoming request :::: ",event);
 
     // Read JSON file from S3 bucket
 
