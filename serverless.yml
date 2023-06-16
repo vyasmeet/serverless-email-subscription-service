@@ -1,6 +1,9 @@
 service: serverless-email-subscription-service
 frameworkVersion: '3'
 
+package:
+  excludeDevDependencies: true
+
 custom:
   tableName: 'users-table-${sls:stage}'
   region: ${self:provider.region}
@@ -34,6 +37,7 @@ provider:
     USERS_TABLE: ${self:custom.tableName}
     REGION: ${self:provider.region}
     SNS_TOPIC_ARN: arn:aws:sns:us-east-1:915494082450:quotes-messages-dev
+    SENDGRID_API_KEY: "SG.add_your_sendgrid_api_key.ak-TofaGlzex-xxxx"
 
 functions:
   quotes:
@@ -52,6 +56,14 @@ functions:
           method: post 
           cors: true
 
+  subscribers:
+    handler: handlers/getSubscribers.getSubscribers
+    events:
+      - http:
+          path: subscribers
+          method: get 
+          cors: true
+
   staticMailer:
     handler: handlers/staticMailer.staticMailer
     events:
@@ -59,6 +71,17 @@ functions:
           path: static-mailer
           method: post
           cors: true
+
+  sendEmail:
+    handler: handlers/sendEmail.sendEmail
+    events:
+      - http:
+          path: sendEmail
+          method: post
+          cors: true
+      #Fire at 1 PM every day UTC (9 am EST) - cron examples: https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm
+      #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
+      - schedule: cron(0 13 * * ? *)
 
 resources:
   Resources:
@@ -72,7 +95,7 @@ resources:
       Properties:
         TopicArn: !Ref QuotesMessages
         Protocol: email
-        Endpoint: meet.server08@gmail.com
+        Endpoint: your-authorised-email@gmail.com
         DeliveryPolicy: 
           healthyRetryPolicy:
             numRetries: 20
